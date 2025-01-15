@@ -12,7 +12,7 @@ let platformClass = params.platformclass;
 // import "js/platforms/{platformName}.js"
 // and instantiate {platformClass} with all remaining params
 let platform = null;
-import(`./js/platforms/${platformName}.js`)
+import(`./platforms/${platformName}.js`)
     .then(module => {
         platform = new module[platformClass](params);
 
