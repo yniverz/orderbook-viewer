@@ -1,2 +1,2 @@
-# orderbook-viewer
+# OrderBook Viewer
 OrderBook Waterfall viewer
