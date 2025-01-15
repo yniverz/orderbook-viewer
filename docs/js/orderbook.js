@@ -1,3 +1,7 @@
+import { BybitClient } from './platforms/bybit.js';
+import { BinanceClient } from './platforms/binance.js';
+
+
 // get get params
 const urlParams = new URLSearchParams(window.location.search);
 const params = {};
@@ -5,23 +9,29 @@ for (const [key, value] of urlParams) {
     params[key] = value;
 }
 
+console.log(params);
+
 // check for param platformclass
-let platformName = params.platformname;
-let platformClass = params.platformclass;
+let platformName = params.platform;
+let platformClient = null;
 
-// import "js/platforms/{platformName}.js"
-// and instantiate {platformClass} with all remaining params
-let platform = null;
-import(`./platforms/${platformName}.js`)
-    .then(module => {
-        platform = new module[platformClass](params);
+if (platformName === "bybit") {
+    platformClient = new BybitClient(params.symbol, params.depth);
+} else if (platformName === "binance") {
+    platformClient = new BinanceClient(params.symbol, params.depth);
+}
 
-        platform.setOnMessageHandler(message => {
-            console.log(message);
-        });
+if (!platformClient) {
+    throw new Error("Invalid platform name:", platformName);
+}
 
-        platform.connect();
-    })
-    .catch(err => {
-        console.error(err);
-    });
+platformClient.onOrderBookUpdate = (orderBook) => {
+    console.log("Order Book Update:", orderBook);
+}
+
+platformClient.onTradeUpdate = (trade) => {
+    console.log("Trade Update:", trade);
+}
+
+
+platformClient.connect();

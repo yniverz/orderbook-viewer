@@ -9,7 +9,10 @@
             "request": "launch",
             "name": "Launch Chrome with File",
             "file": "${workspaceFolder}/docs/index.html",
-            "webRoot": "${workspaceFolder}"
+            "webRoot": "${workspaceFolder}",
+            "runtimeArgs": [
+                "--disable-web-security"
+            ]
         }
     ]
 }

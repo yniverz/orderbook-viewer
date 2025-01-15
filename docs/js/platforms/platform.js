@@ -1,8 +1,9 @@
 
-class OrderBookEntry {
-    constructor(price, size) {
+export class OrderBookEntry {
+    constructor(price, size, time) {
         this.price = price;
         this.size = size;
+        this.time = time;
     }
 }
 
@@ -14,36 +15,38 @@ class OrderBookEntry {
  * @property {OrderBookEntry[]} asks - Array of ask entries.
  * @property {number} timestamp - When the message was received/parsed.
  */
-class OrderBookSnapshot {
-    constructor(platform, type, bids, asks, timestamp = Date.now()) {
-        this.platform = platform;
-        this.type = type;
+export class OrderBookSnapshot {
+    constructor(bids, asks, time = Date.now()) {
         this.bids = bids;
         this.asks = asks;
-        this.timestamp = timestamp;
+        this.time = time;
     }
 }
+
 
 /**
- * A standardized data structure for parsed messages.
- * @property {OrderBookSnapshot} orderBook - The current order book snapshot.
- * @property {Trade[]} trades - Array of recent trades.
+ * Represents a trade on an exchange.
+ * @property {number} price - The trade price.
+ * @property {number} size - The trade size.
+ * @property {boolean} takerSideBuy - The trade side (true for buy, false for sell).
+ * @property {number} time - The trade timestamp.
  */
-class PlatformMessage {
-    constructor(orderBook, trades) {
-        this.orderBook = orderBook;
-        this.trades = trades;
+export class Trade {
+    constructor(price, size, takerSideBuy, time) {
+        this.price = price;
+        this.size = size;
+        this.takerSideBuy = takerSideBuy;
+        this.time = time;
     }
 }
 
 
 
-class PlatformClient {
+export class PlatformClient {
     constructor(url, platformName) {
         this.url = url;                // WebSocket endpoint URL
         this.platformName = platformName || "Unknown";
         this.socket = null;            // Will hold the WebSocket object
-        this.onMessageHandler = null;  // Callback for incoming *parsed* messages
     }
 
     /**
@@ -68,15 +71,10 @@ class PlatformClient {
 
         this.socket.addEventListener("message", (event) => {
             const rawData = event.data;
-            console.log(`Received raw message from ${this.platformName}:`, rawData);
+            // console.log(`Received raw message from ${this.platformName}:`, rawData);
 
             // Parse the raw message (child classes will provide custom parse logic).
-            const parsed = this.parseRawMessage(rawData);
-
-            // If there's a custom message handler defined by the user, call it with the *parsed* data
-            if (this.onMessageHandler && parsed) {
-                this.onMessageHandler(parsed);
-            }
+            this.handleMessage(rawData);
         });
     }
 
@@ -106,18 +104,26 @@ class PlatformClient {
      * Child classes *must* override this method to return a PlatformMessage object.
      * This default implementation might return null or throw an error.
      */
-    parseRawMessage(rawData) {
+    handleMessage(rawData) {
         // Default or “abstract” behavior. 
-        // Child classes *must* override and return a PlatformMessage object.
+        // Child classes *must* override and can call onOrderBookUpdate or onTradeUpdate.
         console.warn(`parseRawMessage is not implemented in base class. Raw: ${rawData}`);
-        return null;
     }
 
     /**
-     * Set a custom handler function for incoming *parsed* messages.
+     * Custom handler function for incoming *OrderBook Updates*.
+     * @property {OrderBookSnapshot} snapshot - The new order book snapshot.
      */
-    setOnMessageHandler(handlerFn) {
-        this.onMessageHandler = handlerFn;
+    onOrderBookUpdate(snapshot) {
+        console.log("Received order book update:", snapshot);
+    }
+
+    /**
+     * Custom handler function for incoming *Trade Updates*.
+     * @property {Trade[]} trades - Array of recent trades.
+     */
+    onTradeUpdate(trades) {
+        console.log("Received trade update:", trades);
     }
 
     /**
