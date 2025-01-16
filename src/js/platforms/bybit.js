@@ -4,10 +4,12 @@ import { PlatformClient, Trade, OrderBookSnapshot } from './platform.js';
  * Represents a client for the ByBit exchange.
  * @property {string} symbol - The trading pair symbol.
  * @property {number} depth - The number of levels of depth to (1, 50, 200, 500)
+ * @property {string} endpoint - The WebSocket endpoint to connect to.
+ * @property {string} name - The name of the platform.
  */
-export class BybitClient extends PlatformClient {
-    constructor(symbol, depth = 50) {
-        super("wss://stream.bybit.com/v5/public/linear", "ByBit");
+class BybitBaseClient extends PlatformClient {
+    constructor(symbol, depth, endpoint, name) {
+        super(endpoint, name);
         this.symbol = symbol.toUpperCase();
         this.depth = depth;
 
@@ -84,5 +86,33 @@ export class BybitClient extends PlatformClient {
 
             this.onTradeUpdate(tradeData);
         }
+    }
+}
+
+
+
+
+
+
+/**
+ * Represents a client for the ByBit exchange.
+ * @property {string} symbol - The trading pair symbol.
+ * @property {number} depth - The number of levels of depth to (1, 50, 200, 500)
+ */
+export class BybitUsdtPerpClient extends BybitBaseClient {
+    constructor(symbol, depth = 50) {
+        super(symbol, depth, "wss://stream.bybit.com/v5/public/linear", "Bybit USDT-Perpetual", );
+    }
+}
+
+
+/**
+ * Represents a client for the ByBit exchange.
+ * @property {string} symbol - The trading pair symbol.
+ * @property {number} depth - The number of levels of depth to (1, 50, 200, 500)
+ */
+export class BybitSpotClient extends BybitBaseClient {
+    constructor(symbol, depth = 50) {
+        super(symbol, depth, "wss://stream.bybit.com/v5/public/spot", "Bybit Spot");
     }
 }

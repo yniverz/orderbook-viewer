@@ -5,9 +5,9 @@ import { PlatformClient, Trade, OrderBookSnapshot } from './platform.js';
  * @property {string} symbol - The trading pair symbol.
  * @property {number} depth - The number of levels of depth to (1, 50, 200, 500)
  */
-export class BinanceClient extends PlatformClient {
-    constructor(symbol, depth = 20) {
-        super("wss://stream.binance.com:9443/stream?streams="+symbol.toLowerCase()+"@depth"+depth+"@100ms/"+symbol.toLowerCase()+"@trade", "Binance");
+class BinanceBaseClient extends PlatformClient {
+    constructor(symbol, depth, endpoint, name) {
+        super(endpoint, name);
 
         this.symbol = symbol.toLowerCase();
         this.depth = depth;
@@ -51,6 +51,18 @@ export class BinanceClient extends PlatformClient {
         console.log(this.localOrderBook);
     }
 
+}
+
+/**
+ * Represents a client for the Binance Spot exchange.
+ * @property {string} symbol - The trading pair symbol.
+ * @property {number} depth - The number of levels of depth to (1, 50, 200, 500)
+ */
+export class BinanceSpotClient extends BinanceBaseClient {
+    constructor(symbol, depth = 20) {
+        super(symbol, depth, "wss://stream.binance.com:9443/stream?streams="+symbol.toLowerCase()+"@depth"+depth+"@100ms/"+symbol.toLowerCase()+"@trade", "Binance Spot");
+    }
+
     handleMessage(rawMessage) {
         const message = JSON.parse(rawMessage);
 
@@ -73,6 +85,50 @@ export class BinanceClient extends PlatformClient {
         }
 
         if (message.stream === `${this.symbol}@trade`) {
+            const trade = message.data;
+
+            const price = parseFloat(trade.p);
+            const size = parseFloat(trade.q);
+            const takerSideBuy = trade.m ? false : true;
+            const time = new Date(trade.T);
+
+            this.onTradeUpdate([new Trade(price, size, takerSideBuy, time)]);
+        }
+    }
+}
+
+/**
+ * Represents a client for the Binance USDT Perpetual exchange.
+ * @property {string} symbol - The trading pair symbol.
+ * @property {number} depth - The number of levels of depth to (1, 50, 200, 500)
+ */
+export class BinanceFuturesClient extends BinanceBaseClient {
+    constructor(symbol, depth = 20) {
+        super(symbol, depth, "wss://fstream.binance.com/stream?streams="+symbol.toLowerCase()+"@depth"+depth+"@100ms/"+symbol.toLowerCase()+"@aggTrade", "Binance USDT Perpetual");
+    }
+
+    handleMessage(rawMessage) {
+        const message = JSON.parse(rawMessage);
+
+        console.log(message);
+
+        if (message.stream === `${this.symbol}@depth${this.depth}@100ms`) {
+            // if e attribute in message.data
+            if (message.data.e === "depthUpdate") {
+                console.log("Delta Update");
+                const delta = message.data;
+                this.applyDelta(delta);
+                this.localOrderBook.time = new Date(delta.E);
+            } else {
+                console.log("Snapshot Update");
+                this.updateOrderBook(message.data);
+                this.localOrderBook.time = Date.now();
+            }
+
+            this.onOrderBookUpdate(this.localOrderBook);
+        }
+
+        if (message.stream === `${this.symbol}@aggTrade`) {
             const trade = message.data;
 
             const price = parseFloat(trade.p);

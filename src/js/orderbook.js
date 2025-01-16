@@ -1,7 +1,7 @@
 import { OrderBookChart } from './chart.js';
 
-import { BybitClient } from './platforms/bybit.js';
-import { BinanceClient } from './platforms/binance.js';
+import { BybitUsdtPerpClient, BybitSpotClient } from './platforms/bybit.js';
+import { BinanceSpotClient, BinanceFuturesClient } from './platforms/binance.js';
 
 
 // get get params
@@ -16,10 +16,14 @@ for (const [key, value] of urlParams) {
 let platformName = params.platform;
 let platformClient = null;
 
-if (platformName === "bybit") {
-    platformClient = new BybitClient(params.symbol, params.depth);
-} else if (platformName === "binance") {
-    platformClient = new BinanceClient(params.symbol, params.depth);
+if (platformName === "bybitusdtperp") {
+    platformClient = new BybitUsdtPerpClient(params.symbol, params.depth);
+} else if (platformName === "bybitspot") {
+    platformClient = new BybitSpotClient(params.symbol, params.depth);
+} else if (platformName === "binancespot") {
+    platformClient = new BinanceSpotClient(params.symbol, params.depth);
+} else if (platformName === "binancefutures") {
+    platformClient = new BinanceFuturesClient(params.symbol, params.depth);
 }
 
 if (!platformClient) {

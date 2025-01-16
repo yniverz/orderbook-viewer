@@ -9,7 +9,7 @@
   <h1>Enter a Symbol</h1>
   <form action="../orderbook.html" method="get">
     <!-- Platform is fixed to bybit -->
-    <input type="hidden" name="platform" value="bybit" />
+    <input type="hidden" name="platform" value="binancefutures" />
     
     <!-- Symbol Input -->
     <label for="symbolInput">Symbol:</label>
@@ -18,10 +18,9 @@
     <!-- Depth Selector -->
     <label for="depthSelect">Depth:</label>
     <select id="depthSelect" name="depth">
-      <option value="1">1</option>
-      <option value="50" selected>50</option>
-      <option value="200">200</option>
-      <option value="500">500</option>
+      <option value="5">5</option>
+      <option value="10">10</option>
+      <option value="20" selected>20</option>
     </select>
     
     <button type="submit">Go</button>
