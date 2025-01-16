@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Symbol Input</title>
+</head>
+<body>
+  <h1>Enter a Symbol</h1>
+  <form action="../orderbook.html" method="get">
+    <!-- Platform is fixed to bybit -->
+    <input type="hidden" name="platform" value="binance" />
+    
+    <!-- Symbol Input -->
+    <label for="symbolInput">Symbol:</label>
+    <input type="text" id="symbolInput" name="symbol" required />
+
+    <!-- Depth Selector -->
+    <label for="depthSelect">Depth:</label>
+    <select id="depthSelect" name="depth">
+      <option value="5">5</option>
+      <option value="10">10</option>
+      <option value="20" selected>20</option>
+    </select>
+    
+    <button type="submit">Go</button>
+  </form>
+</body>
+</html>
