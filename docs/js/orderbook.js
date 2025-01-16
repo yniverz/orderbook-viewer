@@ -1,3 +1,5 @@
+import { OrderBookChart } from './chart.js';
+
 import { BybitClient } from './platforms/bybit.js';
 import { BinanceClient } from './platforms/binance.js';
 
@@ -9,7 +11,6 @@ for (const [key, value] of urlParams) {
     params[key] = value;
 }
 
-console.log(params);
 
 // check for param platformclass
 let platformName = params.platform;
@@ -25,12 +26,19 @@ if (!platformClient) {
     throw new Error("Invalid platform name:", platformName);
 }
 
+
+
+const chart = new OrderBookChart(document.getElementById("chart"));
+
+
 platformClient.onOrderBookUpdate = (orderBook) => {
     console.log("Order Book Update:", orderBook);
+    chart.updateOrderBook(orderBook);
 }
 
-platformClient.onTradeUpdate = (trade) => {
-    console.log("Trade Update:", trade);
+platformClient.onTradeUpdate = (trades) => {
+    console.log("Trade Update:", trades);
+    chart.addTrades(trades);
 }
 
 
