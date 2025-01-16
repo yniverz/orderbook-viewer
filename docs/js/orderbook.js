@@ -31,6 +31,7 @@ if (!platformClient) {
 const chart = new OrderBookChart(document.getElementById("chart"));
 
 
+
 platformClient.onOrderBookUpdate = (orderBook) => {
     console.log("Order Book Update:", orderBook);
     chart.updateOrderBook(orderBook);
@@ -43,3 +44,12 @@ platformClient.onTradeUpdate = (trades) => {
 
 
 platformClient.connect();
+
+
+const slider = document.querySelector('.header-slider');
+const slider_value = document.querySelector('.header-slider-value');
+slider.addEventListener('input', (event) => {
+    const sliderValue = Number(event.target.value);
+    slider_value.textContent = Math.round(sliderValue) + "s";
+    chart.maxAge = sliderValue * 1000;
+});
