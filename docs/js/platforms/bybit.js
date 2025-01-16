@@ -8,7 +8,7 @@ import { PlatformClient, Trade, OrderBookSnapshot } from './platform.js';
 export class BybitClient extends PlatformClient {
     constructor(symbol, depth = 50) {
         super("wss://stream.bybit.com/v5/public/linear", "ByBit");
-        this.symbol = symbol;
+        this.symbol = symbol.toUpperCase();
         this.depth = depth;
 
         this.localOrderBook = new OrderBookSnapshot([], []);
