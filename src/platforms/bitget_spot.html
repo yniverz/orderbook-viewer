@@ -6,10 +6,10 @@
   <link rel="stylesheet" href="../css/platform_config.css">
 </head>
 <body>
-  <h1>Enter a Symbol for Binance Spot</h1>
+  <h1>Enter a Symbol for Bitget Spot</h1>
   <form action="../orderbook.html" method="get">
     <!-- Platform is fixed to bybit -->
-    <input type="hidden" name="platform" value="binancespot" />
+    <input type="hidden" name="platform" value="bitgetspot" />
     
     <!-- Symbol Input -->
     <label for="symbolInput">Symbol:</label>
@@ -18,9 +18,10 @@
     <!-- Depth Selector -->
     <label for="depthSelect">Depth:</label>
     <select id="depthSelect" name="depth">
-      <option value="5">5</option>
-      <option value="10">10</option>
-      <option value="20" selected>20</option>
+        <option value="1">1</option>
+        <option value="5">5</option>
+        <option value="15" selected>15</option>
+        <option value="400">400</option>
     </select>
     
     <button type="submit">Go</button>

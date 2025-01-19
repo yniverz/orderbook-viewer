@@ -2,6 +2,8 @@ import { OrderBookChart } from './chart.js';
 
 import { BybitUsdtPerpClient, BybitSpotClient } from './platforms/bybit.js';
 import { BinanceSpotClient, BinanceFuturesClient } from './platforms/binance.js';
+import { BitgetSpotClient, BitgetFuturesClient } from './platforms/bitget.js';
+
 
 
 // get get params
@@ -24,6 +26,10 @@ if (platformName === "bybitusdtperp") {
     platformClient = new BinanceSpotClient(params.symbol, params.depth);
 } else if (platformName === "binancefutures") {
     platformClient = new BinanceFuturesClient(params.symbol, params.depth);
+} else if (platformName === "bitgetspot") {
+    platformClient = new BitgetSpotClient(params.symbol, params.depth);
+} else if (platformName === "bitgetfutures") {
+    platformClient = new BitgetFuturesClient(params.symbol, params.depth);
 }
 
 if (!platformClient) {
