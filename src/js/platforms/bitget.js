@@ -23,6 +23,11 @@ class BitgetBaseClient extends PlatformClient {
     updateOrderBook(snapshot) {
         this.localOrderBook.bids = snapshot.bids.map(([price, size]) => ({ price: parseFloat(price), size: parseFloat(size) }));
         this.localOrderBook.asks = snapshot.asks.map(([price, size]) => ({ price: parseFloat(price), size: parseFloat(size) }));
+
+
+        // sort the order book
+        this.localOrderBook.bids.sort((a, b) => a.price - b.price);
+        this.localOrderBook.asks.sort((a, b) => a.price - b.price);
     }
 
     applyDelta(delta) {
@@ -50,6 +55,10 @@ class BitgetBaseClient extends PlatformClient {
 
     handleMessage(rawMessage) {
         const message = JSON.parse(rawMessage);
+        
+        if (message.event === "subscribe") {
+            return;
+        }
 
         if (message.arg.channel === `books${this.depth}`) {
             if (message.action === "snapshot") {
@@ -58,26 +67,26 @@ class BitgetBaseClient extends PlatformClient {
                 this.applyDelta(message.data[0]);
             }
 
-            this.localOrderBook.time = new Date(message.cts);
+            this.localOrderBook.time = new Date(parseFloat(message.data[0].ts));
 
             this.onOrderBookUpdate(this.localOrderBook);
         }
 
-        // if (message.topic === `publicTrade.${this.symbol}`) {
-        //     const trades = message.data;
+        if (message.arg.channel === `trade`) {
+            const trades = message.data;
 
-        //     let tradeData = [];
-        //     trades.forEach(trade => {
-        //         const price = parseFloat(trade.p);
-        //         const size = parseFloat(trade.v);
-        //         const takerSideBuy = trade.S === "Buy" ? true : false;
-        //         const time = new Date(trade.T);
+            let tradeData = [];
+            trades.forEach(trade => {
+                const price = parseFloat(trade.price);
+                const size = parseFloat(trade.size);
+                const takerSideBuy = trade.side === "buy" ? true : false;
+                const time = new Date(parseFloat(trade.ts));
                 
-        //         tradeData.push(new Trade(price, size, takerSideBuy, time));
-        //     });
+                tradeData.push(new Trade(price, size, takerSideBuy, time));
+            });
 
-        //     this.onTradeUpdate(tradeData);
-        // }
+            this.onTradeUpdate(tradeData);
+        }
     }
 }
 
@@ -91,7 +100,7 @@ class BitgetBaseClient extends PlatformClient {
  * @property {string} symbol - The trading pair symbol.
  * @property {number} depth - The number of levels of depth to (1, 50, 200, 500)
  */
-export class BitgetFuturesClient extends BitgetBaseClient {
+export class BitgetUsdtFuturesClient extends BitgetBaseClient {
     constructor(symbol, depth = 15) {
         super(symbol, depth, "Bitget USDT-Futures");
     }
@@ -101,11 +110,18 @@ export class BitgetFuturesClient extends BitgetBaseClient {
         console.log("Connected to ByBit WebSocket");
         this.socket.send(JSON.stringify({
             op: "subscribe",
-            args: [{
-                "instType": "USDT-FUTURES",
-                "channel": `books${this.depth}`,
-                "instId": this.symbol
-            }]
+            args: [
+                {
+                    "instType": "USDT-FUTURES",
+                    "channel": `books${this.depth}`,
+                    "instId": this.symbol
+                },
+                {
+                    "instType": "USDT-FUTURES",
+                    "channel": "trade",
+                    "instId": this.symbol
+                }
+            ]
         }));
     }
 }
@@ -125,11 +141,18 @@ export class BitgetSpotClient extends BitgetBaseClient {
         console.log("Connected to ByBit WebSocket");
         this.socket.send(JSON.stringify({
             op: "subscribe",
-            args: [{
-                "instType": "SPOT",
-                "channel": `books${this.depth}`,
-                "instId": this.symbol
-            }]
+            args: [
+                {
+                    "instType": "SPOT",
+                    "channel": `books${this.depth}`,
+                    "instId": this.symbol
+                },
+                {
+                    "instType": "SPOT",
+                    "channel": "trade",
+                    "instId": this.symbol
+                }
+            ]
         }));
     }
 }
